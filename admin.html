@@ -263,9 +263,10 @@
             </div>
 
             <!-- BARRA DE CONTROLES + BUSCADOR RÁPIDO (#141417) -->
-            <div class="p-3.5 rounded-xl bg-[#141417] border border-[#27272A] flex flex-col lg:flex-row lg:items-center lg:justify-between lg:flex-nowrap gap-3 text-[14px] relative">
-              <!-- Izquierda: Fecha (< Hoy >) + Buscador -->
-              <div class="grid grid-cols-1 md:flex md:items-center gap-2.5 lg:gap-3 w-full lg:flex-1 lg:min-w-0">
+            <div class="p-3.5 rounded-xl bg-[#141417] border border-[#27272A] flex flex-col gap-3 text-[14px] relative">
+              <!-- Fila superior en escritorio (Fecha + Hoy a la izquierda; Barbero + Bloquear + Nuevo Turno a la derecha) -->
+              <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5 lg:gap-3 w-full">
+                <!-- Izquierda: Fecha (< Hoy >) -->
                 <div class="flex items-center gap-1.5 w-full md:w-auto flex-shrink-0">
                   <button type="button" id="btn-admin-prev-day" class="w-10 h-10 rounded-lg bg-[#1B1B1F] hover:bg-[#27272A] text-[#FAFAFA] border border-[#27272A] transition-colors flex items-center justify-center flex-shrink-0" title="Día anterior" aria-label="Día anterior">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
@@ -304,39 +305,39 @@
                   </button>
                 </div>
 
-                <!-- Buscador rápido de cliente o teléfono -->
-                <div class="relative w-full md:flex-1 lg:min-w-[220px]">
-                  <svg class="w-4 h-4 text-[#71717A] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
-                  </svg>
-                  <input type="search" id="admin-search-input" placeholder="Buscar cliente o teléfono..."
-                         class="saas-input w-full h-10 pl-9 pr-3 rounded-lg text-[14px] transition-colors">
+                <!-- Derecha: Filtro Barbero + Bloquear + Nuevo Turno -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:flex md:items-center lg:flex-nowrap gap-2.5 lg:gap-3 w-full lg:w-auto flex-shrink-0">
+                  <input type="hidden" id="admin-barber-filter" value="todos">
+                  <div class="relative sm:col-span-2 md:col-span-1 w-full md:w-auto">
+                    <button type="button" id="btn-admin-barber-picker" class="w-full md:w-auto flex items-center justify-between gap-2.5 bg-[#1B1B1F] hover:bg-[#27272A] border border-[#27272A] rounded-lg px-3.5 h-10 text-[14px] font-medium text-[#FAFAFA] transition-colors lg:min-w-[195px]">
+                      <span class="flex items-center gap-2 min-w-0">
+                        <span id="admin-barber-picker-avatar" class="hidden flex-shrink-0"></span>
+                        <span id="admin-barber-label" class="truncate">Todos los barberos</span>
+                      </span>
+                      <svg class="w-4 h-4 text-[#A1A1AA] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div id="admin-custom-barber-dropdown" class="hidden absolute top-full left-0 lg:left-auto lg:right-0 mt-2 z-50 bg-[#141417] border border-[#27272A] rounded-xl p-1.5 shadow-2xl w-full lg:w-72 max-w-[calc(100vw-32px)] text-left space-y-1">
+                    </div>
+                  </div>
+
+                  <button type="button" id="btn-open-block-modal" onclick="window.adminPanel && window.adminPanel.openBlockModal()"
+                          class="w-full md:w-auto h-10 px-3.5 rounded-lg bg-[#1B1B1F] hover:bg-[#27272A] text-[#FAFAFA] border border-[#27272A] hover:border-[#3F3F46] text-[14px] font-medium transition-colors whitespace-nowrap cursor-pointer">
+                    Bloquear Horario
+                  </button>
+                  <button type="button" id="btn-open-manual-booking-modal" onclick="window.adminPanel && window.adminPanel.openManualBookingModal()"
+                          class="hidden sm:inline-flex items-center justify-center gap-1.5 w-full md:w-auto h-10 px-4 rounded-lg bg-[#FAFAFA] hover:bg-[#E4E4E7] text-[#09090B] text-[14px] font-semibold transition-colors whitespace-nowrap cursor-pointer">
+                    <span>+ Nuevo Turno</span>
+                  </button>
                 </div>
               </div>
 
-              <!-- Derecha: Filtro Barbero + Bloquear + Nuevo Turno -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 md:flex md:items-center lg:flex-nowrap gap-2.5 lg:gap-3 w-full lg:w-auto flex-shrink-0">
-                <input type="hidden" id="admin-barber-filter" value="todos">
-                <div class="relative sm:col-span-2 md:col-span-1 w-full md:w-auto">
-                  <button type="button" id="btn-admin-barber-picker" class="w-full md:w-auto flex items-center justify-between gap-2.5 bg-[#1B1B1F] hover:bg-[#27272A] border border-[#27272A] rounded-lg px-3.5 h-10 text-[14px] font-medium text-[#FAFAFA] transition-colors lg:min-w-[180px]">
-                    <span class="flex items-center gap-2 min-w-0">
-                      <span id="admin-barber-picker-avatar" class="hidden flex-shrink-0"></span>
-                      <span id="admin-barber-label" class="truncate">Todos los barberos</span>
-                    </span>
-                    <svg class="w-4 h-4 text-[#A1A1AA] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-                  </button>
-                  <div id="admin-custom-barber-dropdown" class="hidden absolute top-full left-0 lg:left-auto lg:right-0 mt-2 z-50 bg-[#141417] border border-[#27272A] rounded-xl p-1.5 shadow-2xl w-full lg:w-72 max-w-[calc(100vw-32px)] text-left space-y-1">
-                  </div>
-                </div>
-
-                <button type="button" id="btn-open-block-modal" onclick="window.adminPanel && window.adminPanel.openBlockModal()"
-                        class="w-full md:w-auto h-10 px-3.5 rounded-lg bg-[#1B1B1F] hover:bg-[#27272A] text-[#FAFAFA] border border-[#27272A] hover:border-[#3F3F46] text-[14px] font-medium transition-colors whitespace-nowrap cursor-pointer">
-                  Bloquear Horario
-                </button>
-                <button type="button" id="btn-open-manual-booking-modal" onclick="window.adminPanel && window.adminPanel.openManualBookingModal()"
-                        class="hidden sm:inline-flex items-center justify-center gap-1.5 w-full md:w-auto h-10 px-4 rounded-lg bg-[#FAFAFA] hover:bg-[#E4E4E7] text-[#09090B] text-[14px] font-semibold transition-colors whitespace-nowrap cursor-pointer">
-                  <span>+ Nuevo Turno</span>
-                </button>
+              <!-- Fila inferior: Buscador rápido de cliente o teléfono a ancho completo -->
+              <div class="relative w-full">
+                <svg class="w-4 h-4 text-[#71717A] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+                </svg>
+                <input type="search" id="admin-search-input" placeholder="Buscar cliente o teléfono..."
+                       class="saas-input w-full h-10 pl-9 pr-3 rounded-lg text-[14px] transition-colors">
               </div>
             </div>
 
