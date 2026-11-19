@@ -160,7 +160,7 @@ class BookingEngine {
               <a href="${s.googleMapsUrl}" target="_blank" rel="noopener"
                  onclick="event.stopPropagation()"
                  class="btn btn-ghost btn-sm sm:w-auto">
-                Google Maps ↗
+                Ver ubicación ↗
               </a>
               <button type="button"
                       class="btn btn-primary btn-sm flex-1">
@@ -223,7 +223,7 @@ class BookingEngine {
           <span class="text-cream-dim truncate text-[11px] sm:text-xs">${s.direccion}</span>
         </div>
         <div class="flex items-center gap-3 flex-shrink-0">
-          <a href="${s.googleMapsUrl}" target="_blank" rel="noopener" class="text-mustard hover:underline font-semibold text-xs">Maps ↗</a>
+          <a href="${s.googleMapsUrl}" target="_blank" rel="noopener" class="text-mustard hover:underline font-semibold text-xs">Ver ubicación ↗</a>
           <button type="button" id="btn-banner-change-branch" class="text-cream-dim hover:text-cream underline text-xs">Cambiar</button>
         </div>
       </div>

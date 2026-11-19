@@ -4,7 +4,7 @@
  */
 
 const CONFIG = {
-  dataVersion: "2026-11-18-wonoma-v9",
+  dataVersion: "2026-11-18-wonoma-v10",
 
   barberia: {
     nombre: "Barbershop Lo de Ale",
@@ -16,7 +16,7 @@ const CONFIG = {
     instagram: "barbershop_lodeale",
     instagramUrl: "https://instagram.com/barbershop_lodeale",
     linktreeUrl: "https://linktr.ee/barbershoplodeale",
-    googleMapsUrl: "https://share.google/l34myvZPnahb2L7XS",
+    googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Barbershop+Lo+de+Ale+Jorge+Bell+y+473+Bis+City+Bell",
     horariosTexto: "Lun a Sáb • Consultar por sede",
     duracionTurnoDefectoMinutos: 30,
     horaApertura: 9,
@@ -57,7 +57,7 @@ const CONFIG = {
         foto: "assets/salon/fachada-city-bell.jpg",
         telefonoWhatsApp: "5492215073940",
         telefonoVisible: "0221 507-3940",
-        googleMapsUrl: "https://share.google/l34myvZPnahb2L7XS",
+        googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Barbershop+Lo+de+Ale+Jorge+Bell+y+473+Bis+City+Bell",
         horariosTexto: "Lun 13 a 20:30 hs • Mar a Sáb 9:30 a 20:30 hs",
         activa: true
       },
@@ -70,7 +70,7 @@ const CONFIG = {
         foto: "assets/salon/fachada-villa-elisa.jpg",
         telefonoWhatsApp: "5492215073940",
         telefonoVisible: "0221 507-3940",
-        googleMapsUrl: "https://share.google/pp1HSwKZjvedjCHxd",
+        googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Barbershop+Lo+de+Ale+Calle+6+1265+Villa+Elisa",
         horariosTexto: "Mar a Sáb 9:30 a 13 hs y 15 a 20 hs",
         activa: true
       }
