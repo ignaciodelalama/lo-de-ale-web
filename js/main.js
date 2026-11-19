@@ -127,7 +127,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!href) return;
 
     const lower = href.toLowerCase();
-    if (lower === "#agenda" || lower === "#admin" || lower === "#staff") return;
+    if (lower === "#agenda" || lower === "#admin" || lower === "#staff") {
+      e.preventDefault();
+      window.location.href = "/admin.html";
+      return;
+    }
 
     // El logo del header maneja además triple toque para staff; dejamos que haga scroll suave al inicio
     e.preventDefault();
@@ -146,12 +150,39 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // 4b. Acceso al Panel de Gestión desde index.html -> redirección directa a /admin.html
+  document.getElementById("btn-footer-staff-access")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    window.location.href = "/admin.html";
+  });
+
+  const headerLogoLink = document.getElementById("header-logo-link");
+  if (headerLogoLink) {
+    let logoTapCount = 0;
+    let logoTapTimer = null;
+    headerLogoLink.addEventListener("click", () => {
+      logoTapCount += 1;
+      clearTimeout(logoTapTimer);
+      if (logoTapCount >= 3) {
+        logoTapCount = 0;
+        window.location.href = "/admin.html";
+        return;
+      }
+      logoTapTimer = setTimeout(() => {
+        logoTapCount = 0;
+      }, 700);
+    });
+  }
+
   // Alinear correctamente si la página se abre o navega por hash directo (#reservas, #equipo, #salon)
   const alignInitialHash = (instant = true) => {
     const hash = window.location.hash;
     if (!hash) return;
     const lower = hash.toLowerCase();
-    if (lower === "#agenda" || lower === "#admin" || lower === "#staff") return;
+    if (lower === "#agenda" || lower === "#admin" || lower === "#staff") {
+      window.location.href = "/admin.html";
+      return;
+    }
     window.scrollToSection(hash, { instant });
   };
   if (window.location.hash) {

@@ -81,7 +81,7 @@ class AdminPanel {
     this.setupBarbersModal();
     this.setupEventListeners();
     this.updateDateUI();
-    this.checkInitialHash();
+    await this.checkAuthAndRoute();
   }
 
   resolveAdminAccount(email) {
@@ -372,8 +372,17 @@ class AdminPanel {
     setTimeout(() => this.emailInput?.focus(), 100);
   }
 
-  logoutToLogin(preselectBranchId = "suc_city_bell") {
+  async logoutToLogin(preselectBranchId = "suc_city_bell") {
+    if (window.dataService?.isSupabaseEnabled && window.dataService?.client?.auth) {
+      try {
+        await window.dataService.client.auth.signOut();
+      } catch (err) {
+        console.warn("Error al cerrar sesión en Supabase:", err);
+      }
+    }
     this.clearBranchSession(this.selectedBranch);
+    localStorage.removeItem("lodeale_admin_auth");
+    localStorage.removeItem("lodeale_admin_email");
     this.adminRole = "encargado";
     this.lockedBranch = null;
     this.openLoginForBranch(preselectBranchId || this.selectedBranch || "suc_city_bell");
@@ -1898,25 +1907,9 @@ class AdminPanel {
   }
 
   setupEventListeners() {
-    // Abrir panel únicamente desde el botón de Staff al final de la página (footer)
-    document.getElementById("btn-footer-staff-access")?.addEventListener("click", (e) => {
-      e.preventDefault();
-      this.open();
-    });
-
-    // Cerrar panel y volver a la web
-    document.getElementById("btn-close-admin-overlay")?.addEventListener("click", () => {
-      this.close();
-    });
-
     // Cerrar sesión
-    document.getElementById("btn-admin-logout")?.addEventListener("click", () => {
-      localStorage.removeItem("lodeale_admin_auth");
-      localStorage.removeItem("lodeale_admin_email");
-      this.loginScreen?.classList.remove("hidden");
-      this.appView?.classList.add("hidden");
-      if (this.emailInput) this.emailInput.value = "";
-      if (this.passwordInput) this.passwordInput.value = "";
+    document.getElementById("btn-admin-logout")?.addEventListener("click", async () => {
+      await this.logoutToLogin(this.selectedBranch && this.selectedBranch !== "todas" ? this.selectedBranch : "suc_city_bell");
     });
 
     // Menú Desplegable de Gestión (Izquierda)
@@ -1952,27 +1945,6 @@ class AdminPanel {
       this.renderList();
     });
 
-    // Cierre inteligente del Login: si hay una sesión activa, vuelve al panel en esa sede
-    const handleSmartLoginClose = () => {
-      const activeBranch = localStorage.getItem("lodeale_admin_active_branch");
-      const sesion = activeBranch ? this.getBranchSession(activeBranch) : null;
-      if (sesion) {
-        this.adminRole = sesion.role || "encargado";
-        this.lockedBranch = activeBranch;
-        this.setActiveBranch(activeBranch);
-        this.showAgenda();
-      } else {
-        this.close();
-      }
-    };
-
-    document.getElementById("btn-close-login-screen")?.addEventListener("click", handleSmartLoginClose);
-    this.loginScreen?.addEventListener("click", (e) => {
-      if (e.target === this.loginScreen) {
-        handleSmartLoginClose();
-      }
-    });
-
     document.getElementById("menu-opt-horarios")?.addEventListener("click", () => {
       closeAdminMenu();
       this.openSidebarHorarios();
@@ -1993,9 +1965,9 @@ class AdminPanel {
       this.close();
     });
 
-    document.getElementById("menu-opt-logout")?.addEventListener("click", () => {
+    document.getElementById("menu-opt-logout")?.addEventListener("click", async () => {
       closeAdminMenu();
-      this.logoutToLogin(this.selectedBranch && this.selectedBranch !== "todas" ? this.selectedBranch : "suc_city_bell");
+      await this.logoutToLogin(this.selectedBranch && this.selectedBranch !== "todas" ? this.selectedBranch : "suc_city_bell");
     });
 
     // Selector de sucursal en la pantalla de Login
@@ -2022,34 +1994,78 @@ class AdminPanel {
       });
     });
 
-    // Envío del Login por Sucursal + Email + Clave
-    this.loginForm?.addEventListener("submit", (e) => {
+    // Envío del Login por Sucursal + Email + Clave (Supabase Auth o modo local)
+    this.loginForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const chosenBranch = loginBranchInp?.value || "suc_city_bell";
       const inputEmail = this.emailInput?.value.trim().toLowerCase();
       const inputPass = this.passwordInput?.value.trim();
+      const submitBtn = document.getElementById("btn-admin-login-submit");
 
-      const cuenta = this.resolveAdminAccount(inputEmail);
-      const passCorrecto = (CONFIG.barberia.passwordAdmin || CONFIG.barberia.pinAccesoAdmin || "1472").trim();
+      if (!inputEmail || !inputPass) return;
 
-      const emailValido = Boolean(cuenta);
-      const passValido = inputPass === passCorrecto;
+      let cuenta = this.resolveAdminAccount(inputEmail);
 
-      if (!emailValido || !passValido) {
-        this.loginError?.classList.remove("hidden");
-        if (!emailValido) {
-          this.loginError.innerText = "Email no autorizado. Verificá la cuenta ingresada.";
-        } else {
-          this.loginError.innerText = "Contraseña incorrecta. Por favor verificala.";
+      if (window.dataService?.isSupabaseEnabled && window.dataService?.client?.auth) {
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Ingresando...";
         }
-        if (this.passwordInput) {
-          this.passwordInput.value = "";
-          this.passwordInput.focus();
+        try {
+          const { data, error } = await window.dataService.client.auth.signInWithPassword({
+            email: inputEmail,
+            password: inputPass
+          });
+          if (error || !data?.session) {
+            this.loginError?.classList.remove("hidden");
+            if (this.loginError) {
+              this.loginError.innerText = "Email o contraseña incorrectos. Verificá tus credenciales.";
+            }
+            if (this.passwordInput) {
+              this.passwordInput.value = "";
+              this.passwordInput.focus();
+            }
+            return;
+          }
+          if (!cuenta) {
+            cuenta = { email: inputEmail, rol: "admin_general", sucursal_id: "todas", nombre: inputEmail };
+          }
+        } catch (err) {
+          this.loginError?.classList.remove("hidden");
+          if (this.loginError) {
+            this.loginError.innerText = "Error de conexión al iniciar sesión. Intentá nuevamente.";
+          }
+          return;
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Iniciar Sesión";
+          }
         }
-        return;
+      } else {
+        const passCorrecto = (CONFIG.barberia.passwordAdmin || CONFIG.barberia.pinAccesoAdmin || "1472").trim();
+        const emailValido = Boolean(cuenta);
+        const passValido = inputPass === passCorrecto;
+
+        if (!emailValido || !passValido) {
+          this.loginError?.classList.remove("hidden");
+          if (!emailValido) {
+            this.loginError.innerText = "Email no autorizado. Verificá la cuenta ingresada.";
+          } else {
+            this.loginError.innerText = "Contraseña incorrecta. Por favor verificala.";
+          }
+          if (this.passwordInput) {
+            this.passwordInput.value = "";
+            this.passwordInput.focus();
+          }
+          return;
+        }
       }
 
       if (cuenta.rol === "encargado" && cuenta.sucursal_id !== chosenBranch) {
+        if (window.dataService?.isSupabaseEnabled && window.dataService?.client?.auth) {
+          try { await window.dataService.client.auth.signOut(); } catch {}
+        }
         const sucCuenta = this.sucursales.find(s => s.id === cuenta.sucursal_id);
         this.loginError?.classList.remove("hidden");
         this.loginError.innerText = `Esta cuenta solo tiene acceso a la sede ${sucCuenta ? sucCuenta.nombre : "asignada"}.`;
@@ -2848,21 +2864,40 @@ class AdminPanel {
     });
   }
 
-  checkInitialHash() {
-    const hash = window.location.hash.toLowerCase();
-    if (hash === "#agenda" || hash === "#admin" || hash === "#staff") {
-      this.open();
-    }
-  }
-
-  open() {
-    if (!this.overlay) return;
-    this.overlay.classList.remove("hidden");
-    this.overlay.classList.add("flex");
-    document.body.classList.add("overflow-hidden");
+  async checkAuthAndRoute() {
+    this.appView?.classList.add("hidden");
+    this.loginScreen?.classList.remove("hidden");
 
     const activeBranch = localStorage.getItem("lodeale_admin_active_branch") || "suc_city_bell";
     const sesionActiva = this.getBranchSession(activeBranch);
+
+    if (window.dataService?.isSupabaseEnabled && window.dataService?.client?.auth) {
+      let sbSession = null;
+      try {
+        const { data, error } = await window.dataService.client.auth.getSession();
+        if (!error) sbSession = data?.session || null;
+      } catch (err) {
+        console.warn("Error verificando sesión de Supabase:", err);
+      }
+
+      if (sbSession && sesionActiva) {
+        this.adminRole = sesionActiva.role || "encargado";
+        this.lockedBranch = activeBranch;
+        this.setActiveBranch(activeBranch);
+        this.showAgenda();
+        return;
+      }
+
+      if (sbSession && !sesionActiva) {
+        try {
+          await window.dataService.client.auth.signOut();
+        } catch {}
+      }
+
+      this.clearBranchSession(activeBranch);
+      this.openLoginForBranch(activeBranch);
+      return;
+    }
 
     if (sesionActiva) {
       this.adminRole = sesionActiva.role || "encargado";
@@ -2870,25 +2905,16 @@ class AdminPanel {
       this.setActiveBranch(activeBranch);
       this.showAgenda();
     } else {
-      this.loginScreen?.classList.remove("hidden");
-      this.appView?.classList.add("hidden");
-      if (this.loginError) this.loginError.classList.add("hidden");
-      if (typeof this.setLoginBranchSelection === "function") {
-        this.setLoginBranchSelection(activeBranch);
-      }
-      setTimeout(() => this.emailInput?.focus(), 150);
+      this.openLoginForBranch(activeBranch);
     }
   }
 
-  close() {
-    if (!this.overlay) return;
-    this.overlay.classList.add("hidden");
-    this.overlay.classList.remove("flex");
-    document.body.classList.remove("overflow-hidden");
+  open() {
+    this.checkAuthAndRoute();
+  }
 
-    if (window.location.hash) {
-      history.pushState("", document.title, window.location.pathname + window.location.search);
-    }
+  close() {
+    window.location.href = "/index.html";
   }
 
   showAgenda() {
