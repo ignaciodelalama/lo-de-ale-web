@@ -211,27 +211,29 @@
 
       <!-- ÁREA PRINCIPAL -->
       <div class="flex-1 min-w-0 flex flex-col bg-[#09090B]">
-        <!-- Topbar compacta en mobile -->
-        <header class="lg:hidden sticky top-0 z-30 h-16 px-3.5 bg-[#141417] border-b border-[#27272A] flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <button type="button" id="btn-admin-mobile-sidebar" class="w-10 h-10 rounded-lg bg-[#1B1B1F] border border-[#27272A] text-[#FAFAFA] flex items-center justify-center flex-shrink-0" aria-label="Abrir menú">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-            </button>
-            <div class="min-w-0">
-              <span id="admin-mobile-view-title" class="font-semibold text-[15px] text-[#FAFAFA] block truncate leading-tight">Agenda de Turnos</span>
-              <span id="admin-mobile-branch-pill" class="text-[12px] font-medium text-[#A1A1AA] inline-flex items-center gap-1.5 leading-none mt-0.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                <span id="admin-mobile-branch-name">City Bell</span>
-              </span>
+        <!-- Topbar compacta en mobile (Safe Area para PWA / iPhone) -->
+        <header class="lg:hidden sticky top-0 z-30 bg-[#141417] border-b border-[#27272A]" style="padding-top: env(safe-area-inset-top);">
+          <div class="min-h-[64px] px-3.5 py-2 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <button type="button" id="btn-admin-mobile-sidebar" class="w-10 h-10 rounded-lg bg-[#1B1B1F] border border-[#27272A] text-[#FAFAFA] flex items-center justify-center flex-shrink-0" aria-label="Abrir menú">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+              </button>
+              <div class="min-w-0">
+                <span id="admin-mobile-view-title" class="font-semibold text-[15px] text-[#FAFAFA] block truncate leading-tight">Agenda de Turnos</span>
+                <span id="admin-mobile-branch-pill" class="text-[12px] font-medium text-[#A1A1AA] inline-flex items-center gap-1.5 leading-none mt-0.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  <span id="admin-mobile-branch-name">City Bell</span>
+                </span>
+              </div>
             </div>
+            <button type="button" onclick="window.adminPanel && window.adminPanel.openManualBookingModal()"
+                    class="px-3.5 h-10 rounded-lg bg-[#FAFAFA] hover:bg-[#E4E4E7] text-[#09090B] text-[14px] font-semibold whitespace-nowrap flex-shrink-0">
+              + Nuevo Turno
+            </button>
           </div>
-          <button type="button" onclick="window.adminPanel && window.adminPanel.openManualBookingModal()"
-                  class="px-3.5 h-10 rounded-lg bg-[#FAFAFA] hover:bg-[#E4E4E7] text-[#09090B] text-[14px] font-semibold whitespace-nowrap flex-shrink-0">
-            + Nuevo Turno
-          </button>
         </header>
 
-        <main class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 flex-1">
+        <main class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 flex-1">
           <!-- VISTA 1: AGENDA DE TURNOS -->
           <div id="admin-view-agenda" class="space-y-5">
             <!-- KPIs DEL DÍA (4 TARJETAS ELEVADAS #141417) -->
@@ -261,21 +263,21 @@
             </div>
 
             <!-- BARRA DE CONTROLES + BUSCADOR RÁPIDO (#141417) -->
-            <div class="p-3.5 rounded-xl bg-[#141417] border border-[#27272A] flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-[14px] relative">
+            <div class="p-3.5 rounded-xl bg-[#141417] border border-[#27272A] flex flex-col lg:flex-row lg:items-center lg:justify-between lg:flex-nowrap gap-3 text-[14px] relative">
               <!-- Izquierda: Fecha (< Hoy >) + Buscador -->
-              <div class="flex flex-wrap items-center gap-2 flex-1 min-w-0">
-                <div class="flex items-center gap-1.5 max-w-full">
+              <div class="grid grid-cols-1 md:flex md:items-center gap-2.5 lg:gap-3 w-full lg:flex-1 lg:min-w-0">
+                <div class="flex items-center gap-1.5 w-full md:w-auto flex-shrink-0">
                   <button type="button" id="btn-admin-prev-day" class="w-10 h-10 rounded-lg bg-[#1B1B1F] hover:bg-[#27272A] text-[#FAFAFA] border border-[#27272A] transition-colors flex items-center justify-center flex-shrink-0" title="Día anterior" aria-label="Día anterior">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
                   </button>
 
-                  <div class="relative">
-                    <button type="button" id="btn-admin-date-picker" class="flex items-center gap-2 bg-[#1B1B1F] hover:bg-[#27272A] border border-[#27272A] rounded-lg px-3.5 h-10 text-[14px] font-medium text-[#FAFAFA] transition-colors whitespace-nowrap">
-                      <span id="admin-date-label" class="admin-tabular">Cargando fecha...</span>
+                  <div class="relative flex-1 md:flex-initial min-w-0">
+                    <button type="button" id="btn-admin-date-picker" class="w-full md:w-auto flex items-center justify-between md:justify-start gap-2 bg-[#1B1B1F] hover:bg-[#27272A] border border-[#27272A] rounded-lg px-3 h-10 text-[14px] font-medium text-[#FAFAFA] transition-colors whitespace-nowrap">
+                      <span id="admin-date-label" class="admin-tabular truncate">Cargando fecha...</span>
                       <svg class="w-4 h-4 text-[#A1A1AA] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
                     </button>
 
-                    <div id="admin-custom-calendar-dropdown" class="hidden absolute top-full left-0 mt-2 z-50 bg-[#141417] border border-[#27272A] rounded-xl p-4 shadow-2xl w-72 text-center">
+                    <div id="admin-custom-calendar-dropdown" class="hidden absolute top-full left-0 mt-2 z-50 bg-[#141417] border border-[#27272A] rounded-xl p-4 shadow-2xl w-72 max-w-[calc(100vw-32px)] text-center">
                       <div class="flex items-center justify-between mb-3 pb-2 border-b border-[#27272A]">
                         <span id="admin-cal-month-title" class="font-semibold text-sm text-[#FAFAFA]"></span>
                         <div class="flex items-center gap-1">
@@ -297,13 +299,13 @@
                   <button type="button" id="btn-admin-next-day" class="w-10 h-10 rounded-lg bg-[#1B1B1F] hover:bg-[#27272A] text-[#FAFAFA] border border-[#27272A] transition-colors flex items-center justify-center flex-shrink-0" title="Día siguiente" aria-label="Día siguiente">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
                   </button>
-                  <button type="button" id="btn-admin-today" class="h-10 px-3.5 rounded-lg bg-[#1B1B1F] hover:bg-[#27272A] text-[#FAFAFA] border border-[#27272A] font-medium text-[14px] transition-colors">
+                  <button type="button" id="btn-admin-today" class="h-10 px-3.5 rounded-lg bg-[#1B1B1F] hover:bg-[#27272A] text-[#FAFAFA] border border-[#27272A] font-medium text-[14px] transition-colors flex-shrink-0">
                     Hoy
                   </button>
                 </div>
 
                 <!-- Buscador rápido de cliente o teléfono -->
-                <div class="relative flex-1 min-w-[190px] sm:max-w-[270px]">
+                <div class="relative w-full md:flex-1 lg:min-w-[220px]">
                   <svg class="w-4 h-4 text-[#71717A] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                     <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
                   </svg>
@@ -313,26 +315,26 @@
               </div>
 
               <!-- Derecha: Filtro Barbero + Bloquear + Nuevo Turno -->
-              <div class="flex flex-wrap items-center gap-2">
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:flex md:items-center lg:flex-nowrap gap-2.5 lg:gap-3 w-full lg:w-auto flex-shrink-0">
                 <input type="hidden" id="admin-barber-filter" value="todos">
-                <div class="relative">
-                  <button type="button" id="btn-admin-barber-picker" class="flex items-center justify-between gap-2.5 bg-[#1B1B1F] hover:bg-[#27272A] border border-[#27272A] rounded-lg px-3.5 h-10 text-[14px] font-medium text-[#FAFAFA] transition-colors min-w-[195px]">
+                <div class="relative sm:col-span-2 md:col-span-1 w-full md:w-auto">
+                  <button type="button" id="btn-admin-barber-picker" class="w-full md:w-auto flex items-center justify-between gap-2.5 bg-[#1B1B1F] hover:bg-[#27272A] border border-[#27272A] rounded-lg px-3.5 h-10 text-[14px] font-medium text-[#FAFAFA] transition-colors lg:min-w-[180px]">
                     <span class="flex items-center gap-2 min-w-0">
                       <span id="admin-barber-picker-avatar" class="hidden flex-shrink-0"></span>
                       <span id="admin-barber-label" class="truncate">Todos los barberos</span>
                     </span>
                     <svg class="w-4 h-4 text-[#A1A1AA] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
                   </button>
-                  <div id="admin-custom-barber-dropdown" class="hidden absolute top-full right-0 mt-2 z-50 bg-[#141417] border border-[#27272A] rounded-xl p-1.5 shadow-2xl w-72 text-left space-y-1">
+                  <div id="admin-custom-barber-dropdown" class="hidden absolute top-full left-0 lg:left-auto lg:right-0 mt-2 z-50 bg-[#141417] border border-[#27272A] rounded-xl p-1.5 shadow-2xl w-full lg:w-72 max-w-[calc(100vw-32px)] text-left space-y-1">
                   </div>
                 </div>
 
                 <button type="button" id="btn-open-block-modal" onclick="window.adminPanel && window.adminPanel.openBlockModal()"
-                        class="h-10 px-3.5 rounded-lg bg-[#1B1B1F] hover:bg-[#27272A] text-[#FAFAFA] border border-[#27272A] hover:border-[#3F3F46] text-[14px] font-medium transition-colors whitespace-nowrap cursor-pointer">
+                        class="w-full md:w-auto h-10 px-3.5 rounded-lg bg-[#1B1B1F] hover:bg-[#27272A] text-[#FAFAFA] border border-[#27272A] hover:border-[#3F3F46] text-[14px] font-medium transition-colors whitespace-nowrap cursor-pointer">
                   Bloquear Horario
                 </button>
                 <button type="button" id="btn-open-manual-booking-modal" onclick="window.adminPanel && window.adminPanel.openManualBookingModal()"
-                        class="hidden sm:inline-flex items-center gap-1.5 h-10 px-4 rounded-lg bg-[#FAFAFA] hover:bg-[#E4E4E7] text-[#09090B] text-[14px] font-semibold transition-colors whitespace-nowrap cursor-pointer">
+                        class="hidden sm:inline-flex items-center justify-center gap-1.5 w-full md:w-auto h-10 px-4 rounded-lg bg-[#FAFAFA] hover:bg-[#E4E4E7] text-[#09090B] text-[14px] font-semibold transition-colors whitespace-nowrap cursor-pointer">
                   <span>+ Nuevo Turno</span>
                 </button>
               </div>
