@@ -149,7 +149,7 @@
         </p>
 
         <div class="mt-7 sm:mt-8 flex flex-wrap items-center justify-center gap-3">
-          <a href="#reservas" class="btn btn-primary px-7 sm:px-8">Reservar turno</a>
+          <a id="hero-cta-reservar" href="#reservas" class="btn btn-primary px-7 sm:px-8">Reservar turno</a>
           <a href="#equipo" class="btn btn-ghost px-6">Nuestro equipo</a>
         </div>
       </div>
@@ -453,8 +453,7 @@
         </div>
 
         <div class="grid gap-2">
-          <a id="modal-btn-whatsapp" href="#" target="_blank" rel="noopener" class="btn btn-wa w-full btn-sm">Confirmar por WhatsApp</a>
-          <button id="btn-close-modal" class="btn btn-ghost w-full btn-sm">Cerrar</button>
+          <button type="button" id="btn-close-modal" class="btn btn-primary w-full">Cerrar</button>
         </div>
       </div>
     </div>
@@ -517,8 +516,8 @@
     </div>
   </footer>
 
-  <!-- Barra CTA fija en celular -->
-  <div id="mobile-cta-bar" class="md:hidden fixed inset-x-0 bottom-0 z-30 px-3 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-ink via-ink/95 to-transparent">
+  <!-- Barra CTA fija en celular (oculta al inicio cuando el CTA del Hero está visible) -->
+  <div id="mobile-cta-bar" class="md:hidden fixed inset-x-0 bottom-0 z-30 px-3 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-ink via-ink/95 to-transparent is-hidden">
     <div class="flex gap-2">
       <a href="#reservas" class="btn btn-primary flex-1">Sacar turno</a>
       <a href="#" class="dynamic-wa-link btn btn-wa w-12 px-0" aria-label="WhatsApp">
@@ -1268,10 +1267,10 @@
 
   </div>
 
-  <script src="js/config.js?v=20261118_v24"></script>
-  <script src="js/supabase-client.js?v=20261118_v24"></script>
-  <script src="js/booking.js?v=20261118_v24"></script>
-  <script src="js/admin.js?v=20261118_v24"></script>
-  <script src="js/main.js?v=20261118_v24"></script>
+  <script src="js/config.js?v=20261118_v25"></script>
+  <script src="js/supabase-client.js?v=20261118_v25"></script>
+  <script src="js/booking.js?v=20261118_v25"></script>
+  <script src="js/admin.js?v=20261118_v25"></script>
+  <script src="js/main.js?v=20261118_v25"></script>
 </body>
 </html>

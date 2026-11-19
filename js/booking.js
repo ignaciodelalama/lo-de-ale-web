@@ -21,7 +21,7 @@ class BookingEngine {
       sucursal: null,
       service: null,
       barber: null,
-      date: this.formatDateYYYYMMDD(fechaInicial),
+      date: null,
       time: null,
       assignedBarber: null,
       client: {
@@ -519,7 +519,10 @@ class BookingEngine {
 
   selectBarber(barber) {
     this.state.barber = barber;
+    this.state.date = null;
     this.state.time = null;
+    this.state.assignedBarber = null;
+    document.getElementById("btn-to-step-4")?.classList.add("opacity-40", "pointer-events-none");
     this.updateSummary();
     this.goToStep(3);
     this.renderCalendar();
@@ -612,7 +615,7 @@ class BookingEngine {
 
       let clases = "cal-day h-11 w-full rounded-[10px] flex items-center justify-center font-cond text-base font-bold transition-all ";
       if (esNoDisponible) {
-        clases += "text-cream-mute/35 cursor-not-allowed";
+        clases += "cal-disabled text-cream-mute/40 opacity-25 pointer-events-none cursor-not-allowed";
       } else if (esSeleccionado) {
         clases += "bg-mustard text-black font-extrabold shadow-lg scale-105 cursor-pointer";
       } else {
@@ -640,17 +643,9 @@ class BookingEngine {
         this.renderCalendar();
         this.updateSummary();
         this.refreshAvailableSlots();
-        if (window.innerWidth < 768) {
-          setTimeout(() => {
-            const slotsSec = document.getElementById("slots-section");
-            if (slotsSec) {
-              const rect = slotsSec.getBoundingClientRect();
-              if (rect.top > window.innerHeight * 0.68) {
-                window.scrollToSection?.(slotsSec, { extraOffset: 10 });
-              }
-            }
-          }, 120);
-        }
+        requestAnimationFrame(() => {
+          document.getElementById("slots-section")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        });
       });
     });
   }
@@ -755,11 +750,9 @@ class BookingEngine {
           this.updateSummary();
           document.getElementById("btn-to-step-4")?.classList.remove("opacity-40", "pointer-events-none");
 
-          if (window.innerWidth < 768) {
-            setTimeout(() => {
-              document.getElementById("btn-to-step-4")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-            }, 100);
-          }
+          requestAnimationFrame(() => {
+            document.getElementById("btn-to-step-4")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          });
         });
       });
     } catch (err) {
@@ -917,15 +910,69 @@ class BookingEngine {
     document.getElementById("modal-summary-datetime").innerText = fechaHora;
     document.getElementById("modal-summary-client").innerText = `${this.state.client.nombre} (${this.state.client.telefono})`;
 
-    const waBtn = document.getElementById("modal-btn-whatsapp");
-    if (waBtn && this.state.sucursal) {
-      const waTel = this.state.sucursal.telefonoWhatsApp || CONFIG.barberia.telefonoWhatsApp;
-      const msg = `¡Hola Lo de Ale (${sucursalNombre})! Acabo de reservar un turno:\n• Servicio: ${servicioNombre}\n• Barbero: ${barberoNombre}\n• Día y hora: ${fechaHora}\n• Nombre: ${this.state.client.nombre}`;
-      waBtn.href = `https://wa.me/${waTel}?text=${encodeURIComponent(msg)}`;
-    }
-
     modal.classList.remove("hidden");
     modal.classList.add("flex");
+  }
+
+  resetFromStep(stepNumber, { skipScroll = false } = {}) {
+    if (stepNumber <= 0) {
+      this.state.sucursal = null;
+    }
+    if (stepNumber <= 1) {
+      this.state.service = null;
+    }
+    if (stepNumber <= 2) {
+      this.state.barber = null;
+      this.state.assignedBarber = null;
+    }
+    if (stepNumber <= 3) {
+      this.state.date = null;
+      this.state.time = null;
+      this.state.assignedBarber = null;
+      const slotsContainer = document.getElementById("slots-container");
+      if (slotsContainer) {
+        slotsContainer.innerHTML = `<p class="col-span-2 text-cream-mute text-xs py-4 text-center">Seleccioná un día en el calendario.</p>`;
+      }
+      const dateLabel = document.getElementById("selected-date-label");
+      if (dateLabel) dateLabel.innerText = "";
+      document.getElementById("btn-to-step-4")?.classList.add("opacity-40", "pointer-events-none");
+    }
+    if (stepNumber <= 4) {
+      this.state.client = { nombre: "", telefono: "", notas: "" };
+      const errEl = document.getElementById("booking-error-msg");
+      if (errEl) {
+        errEl.innerText = "";
+        errEl.classList.add("hidden");
+      }
+      const submitBtn = document.getElementById("btn-submit-booking");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Confirmar Turno";
+      }
+    }
+
+    this.renderBranches();
+    this.renderServices();
+    this.renderBarbers();
+    if (stepNumber === 3) {
+      this.renderCalendar();
+      this.refreshAvailableSlots();
+    }
+    this.updateSummary();
+    this.goToStep(stepNumber, skipScroll);
+  }
+
+  resetBookingFlow() {
+    const modal = document.getElementById("success-modal");
+    if (modal) {
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+    document.getElementById("booking-form")?.reset();
+    const hoy = new Date();
+    this.currentYear = hoy.getFullYear();
+    this.currentMonth = hoy.getMonth();
+    this.resetFromStep(0, { skipScroll: true });
   }
 
   showError(msg) {
@@ -977,13 +1024,9 @@ class BookingEngine {
 
     if (!skipScroll) {
       requestAnimationFrame(() => {
-        const target = document.getElementById("reservas");
-        if (!target) return;
-        const headerH = document.getElementById("main-header")?.getBoundingClientRect().height || 72;
-        const rect = target.getBoundingClientRect();
-        // En celular siempre encuadrar el paso actual; en escritorio encuadrar si el bloque quedó muy pegado al header
-        if (window.innerWidth < 768 || rect.top < headerH + 16 || rect.top > window.innerHeight * 0.45) {
-          window.scrollToSection?.("reservas");
+        const activeStepEl = document.getElementById(`step-content-${stepNumber}`);
+        if (activeStepEl) {
+          activeStepEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
         }
       });
     }
@@ -1016,10 +1059,13 @@ class BookingEngine {
   }
 
   setupEventListeners() {
-    document.getElementById("btn-back-to-0")?.addEventListener("click", () => this.goToStep(0));
-    document.getElementById("btn-back-to-1")?.addEventListener("click", () => this.goToStep(1));
-    document.getElementById("btn-back-to-2")?.addEventListener("click", () => this.goToStep(2));
-    document.getElementById("btn-back-to-3")?.addEventListener("click", () => this.goToStep(3));
+    if (this._listenersBound) return;
+    this._listenersBound = true;
+
+    document.getElementById("btn-back-to-0")?.addEventListener("click", () => this.resetFromStep(0));
+    document.getElementById("btn-back-to-1")?.addEventListener("click", () => this.resetFromStep(1));
+    document.getElementById("btn-back-to-2")?.addEventListener("click", () => this.resetFromStep(2));
+    document.getElementById("btn-back-to-3")?.addEventListener("click", () => this.resetFromStep(3));
 
     document.getElementById("cal-prev-month")?.addEventListener("click", () => this.prevMonth());
     document.getElementById("cal-next-month")?.addEventListener("click", () => this.nextMonth());
@@ -1034,7 +1080,7 @@ class BookingEngine {
     });
 
     document.getElementById("btn-close-modal")?.addEventListener("click", () => {
-      window.location.reload();
+      this.resetBookingFlow();
     });
 
     // Botones directos de reserva por sucursal (compatibilidad)

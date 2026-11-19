@@ -176,19 +176,55 @@ document.addEventListener("DOMContentLoaded", () => {
   window.updateBranchOpenBadges();
   setInterval(() => window.updateBranchOpenBadges(), 60000);
 
-  // 7. Ocultar barra fija móvil cuando la sección de reservas está en pantalla
+  // 7. Ocultar barra fija móvil en la portada (Hero CTA visible) y cuando la sección de reservas está en pantalla
   const mobileCtaBar = document.getElementById("mobile-cta-bar");
+  const heroCta = document.getElementById("hero-cta-reservar");
   const reservasSection = document.getElementById("reservas");
-  if (mobileCtaBar && reservasSection && "IntersectionObserver" in window) {
-    const ctaObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          mobileCtaBar.classList.toggle("is-hidden", entry.isIntersecting);
-        });
-      },
-      { threshold: 0.12 }
-    );
-    ctaObserver.observe(reservasSection);
+  if (mobileCtaBar && reservasSection) {
+    let isHeroCtaVisible = true;
+    let isReservasVisible = false;
+
+    const syncMobileCtaVisibility = () => {
+      const atTop = window.scrollY <= 10;
+      const shouldHide = atTop || isHeroCtaVisible || isReservasVisible;
+      mobileCtaBar.classList.toggle("is-hidden", shouldHide);
+    };
+
+    if ("IntersectionObserver" in window) {
+      if (heroCta) {
+        const heroObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach(entry => {
+              isHeroCtaVisible = entry.isIntersecting;
+              syncMobileCtaVisibility();
+            });
+          },
+          { threshold: 0.05 }
+        );
+        heroObserver.observe(heroCta);
+      }
+
+      const reservasObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach(entry => {
+            isReservasVisible = entry.isIntersecting;
+            syncMobileCtaVisibility();
+          });
+        },
+        { threshold: 0.1 }
+      );
+      reservasObserver.observe(reservasSection);
+    }
+
+    window.addEventListener("scroll", () => {
+      if (heroCta) {
+        const rect = heroCta.getBoundingClientRect();
+        isHeroCtaVisible = rect.bottom > 0 && rect.top < window.innerHeight;
+      }
+      syncMobileCtaVisibility();
+    }, { passive: true });
+
+    syncMobileCtaVisibility();
   }
 
   // 8. Animación sutil de entrada al hacer scroll (.reveal)
